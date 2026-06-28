@@ -121,27 +121,39 @@ def get_trades(pool_address: str, trade_type: str = "all") -> Optional[list]:
 
 
 def get_trending_pools(page: int = 1) -> list[dict]:
-    """
-    Fetch trending Solana pools — great for collecting fresh meme coin addresses.
-    Returns list of pool attribute dicts.
-    """
     data = _get(f"/networks/{NETWORK}/trending_pools", params={"page": page})
     if not data:
         return []
-    return [item.get("attributes", {}) | {"id": item.get("id", "")}
-            for item in data.get("data", [])]
+    results = []
+    for item in data.get("data", []):
+        attr = item.get("attributes", {})
+        # extract real token address from relationships
+        rels = item.get("relationships", {})
+        base_token = rels.get("base_token", {}).get("data", {}).get("id", "")
+        # id format is "solana_<token_address>" — strip the prefix
+        token_addr = base_token.replace(f"{NETWORK}_", "") if base_token else ""
+        attr["_token_address"] = token_addr
+        attr["id"] = item.get("id", "")
+        results.append(attr)
+    return results
 
 
 def get_new_pools(page: int = 1) -> list[dict]:
-    """
-    Newly created Solana pools — essential for catching rugs early.
-    Returns list of pool attribute dicts.
-    """
     data = _get(f"/networks/{NETWORK}/new_pools", params={"page": page})
     if not data:
         return []
-    return [item.get("attributes", {}) | {"id": item.get("id", "")}
-            for item in data.get("data", [])]
+    results = []
+    for item in data.get("data", []):
+        attr = item.get("attributes", {})
+        # extract real token address from relationships
+        rels = item.get("relationships", {})
+        base_token = rels.get("base_token", {}).get("data", {}).get("id", "")
+        # id format is "solana_<token_address>" — strip the prefix
+        token_addr = base_token.replace(f"{NETWORK}_", "") if base_token else ""
+        attr["_token_address"] = token_addr
+        attr["id"] = item.get("id", "")
+        results.append(attr)
+    return results
 
 
 # ── Feature engineering from raw API data ───────────────────────────────────
@@ -479,7 +491,7 @@ def run_discovery_loop(conn: sqlite3.Connection,
             pool_addr  = pool_attr.get("address", "")
             # relationships aren't in attributes — we derive token from pool name
             # For full token address you'd parse pool relationships; use address as fallback
-            token_addr = pool_attr.get("base_token_address", pool_addr)
+            token_addr = pool_attr.get("_token_address") or pool_addr
             if pool_addr and pool_addr not in seen:
                 seen.add(pool_addr)
                 collect_pool(pool_addr, token_addr, conn)
