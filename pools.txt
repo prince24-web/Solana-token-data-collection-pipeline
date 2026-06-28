@@ -1,0 +1,8 @@
+# pools.txt — one pool per line: pool_address,token_address
+# Get pool addresses from GeckoTerminal Solana page or pump.fun
+# Example entries (replace with real addresses):
+
+# BonkSOL pool on Raydium
+# EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v,BonkSOLxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Add your monitored pools below:
