@@ -29,7 +29,7 @@ log = logging.getLogger(__name__)
 BASE_URL = "https://api.geckoterminal.com/api/v2"
 NETWORK   = "solana"
 HEADERS   = {"Accept": "application/json;version=20230302"}
-DELAY     = 2.2          # seconds between requests (safe under 30 rpm)
+DELAY     = 3.5          # seconds between requests (safe under 30 rpm)
 MAX_RETRY = 3            # retries on transient failures
 
 
